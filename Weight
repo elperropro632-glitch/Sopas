@@ -1,0 +1,71 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+local TOOL_NAME = "weight" -- ahora si en minuscula
+
+task.wait(1)
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "WeightGui"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
+
+local function crearBoton(nombre, texto, posY)
+    local btn = Instance.new("TextButton")
+    btn.Name = nombre
+    btn.Size = UDim2.new(0, 180, 0, 50)
+    btn.Position = UDim2.new(0, 20, 0, posY)
+    btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    btn.TextColor3 = Color3.fromRGB(0, 255, 0)
+    btn.BorderSizePixel = 0
+    btn.Text = texto
+    btn.TextScaled = true
+    btn.Font = Enum.Font.GothamBold
+    btn.Parent = screenGui
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = btn
+    return btn
+end
+
+local btnEquip = crearBoton("EquipBtn", "AUTO EQUIPAR: OFF", 150)
+local btnFast = crearBoton("FastBtn", "FAST WEIGHT: OFF", 210)
+
+local autoEquip = false
+local fastWeight = false
+
+btnEquip.MouseButton1Click:Connect(function()
+    autoEquip = not autoEquip
+    btnEquip.Text = autoEquip and "AUTO EQUIPAR: ON" or "AUTO EQUIPAR: OFF"
+    
+    while autoEquip do
+        local char = player.Character
+        if char then
+            local backpack = player:FindFirstChild("Backpack")
+            if backpack then
+                local tool = backpack:FindFirstChild(TOOL_NAME) or backpack:FindFirstChild(string.lower(TOOL_NAME)) or backpack:FindFirstChild(string.upper(TOOL_NAME))
+                if tool then
+                    char.Humanoid:EquipTool(tool)
+                end
+            end
+        end
+        task.wait(0.3)
+    end
+end)
+
+btnFast.MouseButton1Click:Connect(function()
+    fastWeight = not fastWeight
+    btnFast.Text = fastWeight and "FAST WEIGHT: ON" or "FAST WEIGHT: OFF"
+
+    while fastWeight do
+        local char = player.Character
+        if char then
+            local tool = char:FindFirstChild(TOOL_NAME) or char:FindFirstChild(string.lower(TOOL_NAME))
+            if tool then
+                tool:Activate()
+            end
+        end
+        task.wait(0.07)
+    end
+end)
