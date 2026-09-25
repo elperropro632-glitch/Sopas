@@ -1,43 +1,33 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
+local RunService = game:GetService("RunService")
 
-local TOOL_NAME = "Weight" -- ya corregido con mayuscula
-local DELAY_EQUIP = 0.1
+local TOOL_NAME = "Weight"
 
 local function getTool()
-    -- lo busca en mochila y en personaje
     return player.Backpack:FindFirstChild(TOOL_NAME) or player.Character:FindFirstChild(TOOL_NAME)
 end
 
-local function equipTool()
+local function equip()
     local tool = player.Backpack:FindFirstChild(TOOL_NAME)
     if tool then
         tool.Parent = player.Character
     end
 end
 
--- loop de fast reps
-while true do
-    task.wait(DELAY_EQUIP)
-    
+-- Conexión ultra rápida
+RunService.RenderStepped:Connect(function()
     local tool = getTool()
     
-    if not tool then
-        -- si no lo tiene, espera
-        task.wait(1)
-    else
-        -- si lo tiene en mochila, equipalo
+    if tool then
         if tool.Parent == player.Backpack then
-            equipTool()
-            task.wait(0.15)
+            equip()
         end
-        
-        -- si ya esta equipado, haz la accion rapida
         if tool.Parent == player.Character then
-            -- intenta activar la tool
-            tool:Activate()
-            -- algunos juegos de gym usan RemoteEvent, por si acaso:
-            -- si no te funciona solo con Activate(), dime el nombre del juego y te agrego el remote
+            -- spam de activación lo más rápido posible
+            for i = 1, 10 do
+                tool:Activate()
+            end
         end
     end
-end
+end)
