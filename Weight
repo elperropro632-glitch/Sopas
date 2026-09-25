@@ -1,71 +1,43 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
 
-local TOOL_NAME = "weight" -- ahora si en minuscula
+local TOOL_NAME = "Weight" -- ya corregido con mayuscula
+local DELAY_EQUIP = 0.1
 
-task.wait(1)
-
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "WeightGui"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = playerGui
-
-local function crearBoton(nombre, texto, posY)
-    local btn = Instance.new("TextButton")
-    btn.Name = nombre
-    btn.Size = UDim2.new(0, 180, 0, 50)
-    btn.Position = UDim2.new(0, 20, 0, posY)
-    btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    btn.TextColor3 = Color3.fromRGB(0, 255, 0)
-    btn.BorderSizePixel = 0
-    btn.Text = texto
-    btn.TextScaled = true
-    btn.Font = Enum.Font.GothamBold
-    btn.Parent = screenGui
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = btn
-    return btn
+local function getTool()
+    -- lo busca en mochila y en personaje
+    return player.Backpack:FindFirstChild(TOOL_NAME) or player.Character:FindFirstChild(TOOL_NAME)
 end
 
-local btnEquip = crearBoton("EquipBtn", "AUTO EQUIPAR: OFF", 150)
-local btnFast = crearBoton("FastBtn", "FAST WEIGHT: OFF", 210)
+local function equipTool()
+    local tool = player.Backpack:FindFirstChild(TOOL_NAME)
+    if tool then
+        tool.Parent = player.Character
+    end
+end
 
-local autoEquip = false
-local fastWeight = false
-
-btnEquip.MouseButton1Click:Connect(function()
-    autoEquip = not autoEquip
-    btnEquip.Text = autoEquip and "AUTO EQUIPAR: ON" or "AUTO EQUIPAR: OFF"
+-- loop de fast reps
+while true do
+    task.wait(DELAY_EQUIP)
     
-    while autoEquip do
-        local char = player.Character
-        if char then
-            local backpack = player:FindFirstChild("Backpack")
-            if backpack then
-                local tool = backpack:FindFirstChild(TOOL_NAME) or backpack:FindFirstChild(string.lower(TOOL_NAME)) or backpack:FindFirstChild(string.upper(TOOL_NAME))
-                if tool then
-                    char.Humanoid:EquipTool(tool)
-                end
-            end
+    local tool = getTool()
+    
+    if not tool then
+        -- si no lo tiene, espera
+        task.wait(1)
+    else
+        -- si lo tiene en mochila, equipalo
+        if tool.Parent == player.Backpack then
+            equipTool()
+            task.wait(0.15)
         end
-        task.wait(0.3)
-    end
-end)
-
-btnFast.MouseButton1Click:Connect(function()
-    fastWeight = not fastWeight
-    btnFast.Text = fastWeight and "FAST WEIGHT: ON" or "FAST WEIGHT: OFF"
-
-    while fastWeight do
-        local char = player.Character
-        if char then
-            local tool = char:FindFirstChild(TOOL_NAME) or char:FindFirstChild(string.lower(TOOL_NAME))
-            if tool then
-                tool:Activate()
-            end
+        
+        -- si ya esta equipado, haz la accion rapida
+        if tool.Parent == player.Character then
+            -- intenta activar la tool
+            tool:Activate()
+            -- algunos juegos de gym usan RemoteEvent, por si acaso:
+            -- si no te funciona solo con Activate(), dime el nombre del juego y te agrego el remote
         end
-        task.wait(0.07)
     end
-end)
+end
